@@ -1,6 +1,3 @@
-EE-468
-======
-
 ##Project 2: Building a Device Driver
 Build a memory device driver where the device is a stack of a maximum of 10 bytes.  Initially, the stack is empty.  When the stack is written to, the device will push ASCII lower-case alphabets from the user buffer into the stack.  For example, it will push bytes 'a' and 'k' but will not push bytes 'A', 'K', '*', or '2'.  If the buffer becomes full then the driver will stop and return.
 
