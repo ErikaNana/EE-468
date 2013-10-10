@@ -28,7 +28,7 @@ static struct file_operations fops =
 };
 
 
-// called when module is loaded, similassr to main()
+// called when module is loaded, similar to main()
 int init_module(void)
 {
 	int t = register_chrdev(90,"proj2dev",&fops); //register driver with major:89
@@ -94,14 +94,14 @@ static ssize_t dev_write(struct file *filp,const char *buff,size_t len,loff_t *o
 
 	while (match != NULL){
 		if (counter < 10){
-			printk(KERN_ALERT"Match is %c\n",*match);
+			/*printk(KERN_ALERT"Match is %c\n",*match);*/
 			kernelBuffer[counter] = *match;
 			match = strpbrk(match+1,key);
 			counter++;
-			printk(KERN_ALERT"Counter is %d\n",counter);			
+			/*printk(KERN_ALERT"Counter is %d\n",counter);	*/		
 		}
 		else{
-			printk(KERN_ALERT"BUFFER OVERFLOW!\n");
+			/*printk(KERN_ALERT"BUFFER OVERFLOW!\n");*/
 			return 1;
 		}
 	}
