@@ -1,0 +1,1 @@
+cmd_/home/erika/ee468/proj2/proj2dev.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-3.8.0-30-generic/scripts/module-common.lds --build-id  -o /home/erika/ee468/proj2/proj2dev.ko /home/erika/ee468/proj2/proj2dev.o /home/erika/ee468/proj2/proj2dev.mod.o
