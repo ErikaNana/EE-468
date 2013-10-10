@@ -5,10 +5,10 @@
 
 // module attributes
 MODULE_LICENSE("GPL"); // this avoids kernel taint warning
-MODULE_DESCRIPTION("Device Driver Demo");
+MODULE_DESCRIPTION("Device Driver");
 MODULE_AUTHOR("Erika Nana");
 
-static char msg[100]={0};
+static char kernelBuffer[10] = {0};
 static short readPos=0;
 static int times = 0;
 
@@ -55,15 +55,17 @@ static int dev_open(struct inode *inod,struct file *fil)
 	return 0;
 }
 
-// called when 'read' system call is done on the device file
-//driver pulls bytes out of the stack and puts it into the user buffer
-//if the stack becomes empty then driver will stop and return
+/*
+called when 'read' system call is done on the device file
+driver pulls bytes out of the stack and puts it into the user buffer
+if the stack becomes empty then driver will stop and return
+*/
 static ssize_t dev_read(struct file *filp,char *buff,size_t len,loff_t *off)
 {
 	short count = 0;
-	while (len && (msg[readPos]!=0))
+	while (len && (kernelBuffer[readPos]!=0))
 	{
-		put_user(msg[readPos],buff++); //copy byte from kernel space to user space
+		put_user(kernelBuffer[readPos],buff++); //copy byte from kernel space to user space
 		count++;
 		len--;
 		readPos++;
@@ -71,21 +73,39 @@ static ssize_t dev_read(struct file *filp,char *buff,size_t len,loff_t *off)
 	return count;
 }
 
-// called when 'write' system call is done on the device file
-//device pushes ascii lower-case alphabets from the user buffer into the stack
-//if the buffer becomes full the driver will stop and return
+/*
+called when 'write' system call is done on the device file
+device pushes ascii lower-case alphabets from the user buffer into the stack
+if the buffer becomes full the driver will stop and return
+*/
 static ssize_t dev_write(struct file *filp,const char *buff,size_t len,loff_t *off)
 {
-	short ind = len-1;
-	short count=0;
-	memset(msg,0,100);
-	readPos=0;
-	while(len>0)
-	{
-		msg[count++] = buff[ind--]; //copy the given string to the driver but in reverse
-		len--;
+	//buff --> user space
+	//kernelBuffer -> kernel space
+	char key[] = "abcdefghijklmnopqrstuvwxyz";
+	char *match;
+	short counter = 0;
+	readPos = 0; //need this to reset
+
+	memset(kernelBuffer,0,10);
+
+	//check if there are any matches to begin with
+	match = strpbrk(buff,key);
+
+	while (match != NULL){
+		if (counter < 10){
+			printk(KERN_ALERT"Match is %c\n",*match);
+			kernelBuffer[counter] = *match;
+			match = strpbrk(match+1,key);
+			counter++;
+			printk(KERN_ALERT"Counter is %d\n",counter);			
+		}
+		else{
+			printk(KERN_ALERT"BUFFER OVERFLOW!\n");
+			return 1;
+		}
 	}
-	return count;
+	return counter;
 }
 
 // called when 'close' system call is done on the device file

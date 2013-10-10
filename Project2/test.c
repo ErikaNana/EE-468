@@ -20,6 +20,6 @@ int main(int argc ,char *argv[])
 
 	while(read(fp, &buf[i++], 1));
 
-	printf("Reversed by the driver: %s\n" ,buf);
+	printf("Output of the driver: %s\n" ,buf);
 
 }

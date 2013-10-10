@@ -22,6 +22,8 @@ __attribute__((section("__versions"))) = {
 	{ 0x6e6b9934, "__register_chrdev" },
 	{ 0xc3aaf0a9, "__put_user_1" },
 	{ 0xa1c76e0a, "_cond_resched" },
+	{ 0xf0fdf6cb, "__stack_chk_fail" },
+	{ 0x9a1dfd65, "strpbrk" },
 	{ 0x50eedeb8, "printk" },
 	{ 0xb4390f9a, "mcount" },
 };
@@ -32,4 +34,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "46447D3538E50DA8452A9AC");
+MODULE_INFO(srcversion, "2F5513EFE494F0402D55B2B");
