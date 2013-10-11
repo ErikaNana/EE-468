@@ -3,3 +3,4 @@ Build a memory device driver where the device is a stack of a maximum of 10 byte
 
 When reading the device driver, the driver will pull the bytes out of the stack and put it into the user buffer.  If the stack becomes empty then the driver will stop and return.
 
+Based on the tutorial from this <a href = "http://appusajeev.wordpress.com/2011/06/18/writing-a-linux-character-device-driver/"> site</a>.
