@@ -63,9 +63,13 @@ if the stack becomes empty then driver will stop and return
 static ssize_t dev_read(struct file *filp,char *buff,size_t len,loff_t *off)
 {
 	short count = 0;
+	readPos = 0;
 	while (len && (kernelBuffer[readPos]!=0))
 	{
-		put_user(kernelBuffer[readPos],buff++); //copy byte from kernel space to user space
+		if (len > 10){
+			len = 10;
+		}
+		put_user(kernelBuffer[len-1],buff++);
 		count++;
 		len--;
 		readPos++;
@@ -94,14 +98,14 @@ static ssize_t dev_write(struct file *filp,const char *buff,size_t len,loff_t *o
 
 	while (match != NULL){
 		if (counter < 10){
-			/*printk(KERN_ALERT"Match is %c\n",*match);*/
+			printk(KERN_ALERT"Match is %c\n",*match);
 			kernelBuffer[counter] = *match;
 			match = strpbrk(match+1,key);
 			counter++;
-			/*printk(KERN_ALERT"Counter is %d\n",counter);	*/		
+			printk(KERN_ALERT"Counter is %d\n",counter);			
 		}
 		else{
-			/*printk(KERN_ALERT"BUFFER OVERFLOW!\n");*/
+			printk(KERN_ALERT"BUFFER OVERFLOW!\n");
 			return 1;
 		}
 	}

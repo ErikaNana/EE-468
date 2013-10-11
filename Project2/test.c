@@ -1,25 +1,56 @@
-// String reversal done by device driver
+/* EE 468:  Test for project 2 
+ *
+ * You will likely have to change the open() since your
+ * device name may be different.
+ *
+ * The test will write and read character strings into
+ * the device.  Then it displays, using printf, the
+ * results of the reads.  Record these outputs from
+ * the printfs into a file.
+ */
 
-#include<stdio.h>
+#include <stdio.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <assert.h>
-#include <string.h> // for memset and strlen
+#include <unistd.h>
+#include <string.h>
 
-int main(int argc ,char *argv[])
+int main()
 {
 
-	assert(argc > 1);
-	char buf[100] ;
-	char i = 0;
-	memset(buf, 0, 100);
-	printf("Input: %s\n", argv[1]);
+int fp;
+char buffer_in[100];
+char buffer_out[100];
+int i;
+char c;
 
-	int fp = open("/dev/proj2dev", O_RDWR);
-	
-	write(fp, argv[1], strlen(argv[1]));
+fp = open("/dev/proj2dev", O_RDWR); /* Change "myDev" to your own device. */
 
-	while(read(fp, &buf[i++], 1));
+read(fp,buffer_out,10); /* Clear out your device */  
 
-	printf("Output of the driver: %s\n" ,buf);
+strcpy(buffer_in,"abcdefghijklmnopqrstuvwxyz"); /* Initialize buffer_in */
 
+write(fp, buffer_in, 10); /* This fills the device buffer */
+strcpy(buffer_out,"                           ");  /* Initializes buffer_out*/
+                                     /* with spaces */
+read(fp,buffer_out,10);  
+printf("Write and read 10 characters:  %s\n\n",buffer_out);
+
+write(fp, buffer_in, 5); /* Fill half the device */ 
+strcpy(buffer_out,"                           ");
+read(fp,buffer_out,2);   /* Read two characters */
+printf("Write 5 chars and read 2:  %s\n\n",buffer_out);
+
+write(fp, buffer_in, 2); /* Fill in two more characters */
+strcpy(buffer_out,"                           ");
+read(fp,buffer_out,5);   /* Read all characters in device  */
+printf("Write 2 and read 5 chars:  %s\n\n",buffer_out);
+
+write(fp, buffer_in, 20); 
+strcpy(buffer_out,"                           ");
+read(fp,buffer_out,20);   
+printf("Write 20 chars (overflow to at most 10) and read 20 (should read only 10, underflow):  %s\n\n",buffer_out);
+
+printf("End of test\n");
 }

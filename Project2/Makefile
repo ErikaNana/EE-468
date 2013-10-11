@@ -8,6 +8,3 @@ clean:
 
 test:test.c
 	cc -o test test.c
-	
-actualTest: actualTest.c
-	cc -o actualTest actualTest.c
