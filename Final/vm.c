@@ -15,7 +15,7 @@ long tlbFrame [16] = {[0 ... 15] = -1};
 int frame = 0; //keeps track of current frame
 int tlbIndex = 0; //keeps track of available slot in tlb
 long agePage [256] = {[0 ... 255] = -1}; //keeps track of ages of each page
-int TLB_SIZE = 4;
+int TLB_SIZE = 16;
 
 int main(){
     FILE *ptr_file;
@@ -26,6 +26,8 @@ int main(){
     long pa;
     long offset;
     int hitTLB = 0;
+    int counterAddresses = 0;
+    int counterTLBMisses = 0;
 
     ptr_file = fopen("address.txt", "r");
     if (!ptr_file){
@@ -35,6 +37,7 @@ int main(){
     //read in the file
     while (fgets(buf,1000,ptr_file) != NULL){
         sscanf(buf,"%ld", &address);
+        counterAddresses = counterAddresses + 1;
         pageNumber = getPage(address);
         offset = getOffset(address);
 
@@ -47,6 +50,7 @@ int main(){
         }
         else{
             hitTLB = 0;
+            counterTLBMisses = counterTLBMisses + 1;
             if (tlbIndex == TLB_SIZE){ //implement the lru policy
                 //get the page that has the oldest age
                 int oldestPage = getOldestPage();
@@ -77,6 +81,9 @@ int main(){
         }
         printf("\n");
     }
+    printf("Number of virtual address = %d\n", counterAddresses);
+    printf("Number of page faults = %d\n", counterTLBMisses);
+    printf("Number of TLB misses = %d\n", counterTLBMisses);
     fclose(ptr_file);
     return 0;
 }
