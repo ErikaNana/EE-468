@@ -12,10 +12,10 @@ void updateTLB(int oldPage, long newPage, int newFrame);
 //acts like tlb
 long tlbPage [16] = {[0 ... 15] = -1};
 long tlbFrame [16] = {[0 ... 15] = -1};
-
 int frame = 0; //keeps track of current frame
 int tlbIndex = 0; //keeps track of available slot in tlb
 long agePage [256] = {[0 ... 255] = -1}; //keeps track of ages of each page
+int TLB_SIZE = 4;
 
 int main(){
     FILE *ptr_file;
@@ -25,7 +25,7 @@ int main(){
     long pageNumber;
     long pa;
     long offset;
-
+    int hitTLB = 0;
 
     ptr_file = fopen("address.txt", "r");
     if (!ptr_file){
@@ -38,18 +38,16 @@ int main(){
         pageNumber = getPage(address);
         offset = getOffset(address);
 
-        printf("address:  %ld\n", address);
-        printf("page number:  %ld\n", getPage(address));
-
         //check if the entry is in the TLB
         int currentFrame;
         long hitFrameNumber = checkTLB(pageNumber);
         if (hitFrameNumber != -1){ //there's a hit
             currentFrame = hitFrameNumber;
+            hitTLB = 1;
         }
         else{
-            if (tlbIndex == 4){ //implement the lru policy
-                printf("LRU!\n");
+            hitTLB = 0;
+            if (tlbIndex == TLB_SIZE){ //implement the lru policy
                 //get the page that has the oldest age
                 int oldestPage = getOldestPage();
                 updateTLB(oldestPage, pageNumber, frame);
@@ -60,7 +58,6 @@ int main(){
                 tlbFrame[tlbIndex] = frame;
                 tlbIndex = tlbIndex + 1;
             }
-            printf("tlbIndex now:  %d\n", tlbIndex);
             pageTable[pageNumber] = frame;
             frame = frame + 1;
             currentFrame = pageTable[pageNumber];
@@ -68,22 +65,17 @@ int main(){
         //update the ages of everything else
         updateAgePage(pageNumber);
         pa = getPA(currentFrame,offset);
-        printf("frame number:  %d\n", currentFrame);
-        printf("offset:  %ld\n", offset);
-        printf("pa:  %ld\n", pa);
-        //printf("pageTable entry:  %d\n", pageTable[pageNumber]);
+        printf("%8ld     ", address);
+        printf("%8ld     ", pa);
+        if (hitTLB > 0){
+            printf("%8s     ", "PAGE-HIT");
+            printf("%9s     ", "TLB-HIT");
+        }
+        else{
+            printf("%9s     ", "PAGE-MISS");
+            printf("%9s     ", "TLB-MISS");
+        }
         printf("\n");
-    }
-    //print pages
-/*    int j;
-    for (j = 0; j < 256; j++){
-        printf("page:  %d, age:  %ld\n", j, agePage[j]);
-    }*/
-    //getOldestPage();
-    //print out tlb
-    int m;
-    for (m = 0; m < 4; m++){
-        printf("entry:  %d, page: %ld, frame:  %ld\n", m, tlbPage[m], tlbFrame[m]);
     }
     fclose(ptr_file);
     return 0;
@@ -99,18 +91,15 @@ long getOffset(long address){
 
 //get the physical address
 long getPA(int frame, long offset){
-    printf("    current frame in get PA:  %d\n", frame);
     return (frame * 256) + offset;
 }
 
 //check the TLB for the page
 long checkTLB(long pageNumber){
     int i;
-    for (i = 0; i < 4; i++){
+    for (i = 0; i < TLB_SIZE; i++){
         //if the page is found, return it
         if (tlbPage[i] == pageNumber){
-            printf("    HIT!\n");
-            printf("    returning frame:  %ld\n", tlbFrame[i]);
             return tlbFrame[i];
         }
     }
@@ -124,8 +113,6 @@ void updateAgePage(long pageNumber){
     long i;
     for (i = 0; i < 256; i++){
         if ((agePage[i] != -1) && (i != pageNumber)){
-            printf("i is:  %ld\n", i );
-            printf("updating age of %ld to %ld\n", i, agePage[i] + 1);
             agePage[i] = agePage[i] + 1;
         }
     }
@@ -141,7 +128,6 @@ int getOldestPage(){
             oldestPage = i;
         }
      }
-     printf("oldest page is:  %d\n",oldestPage);
      return oldestPage;
 }
 
@@ -149,7 +135,7 @@ void updateTLB(int oldPage, long newPage, int newFrame){
     //reset the age of the old page
     agePage[oldPage] = -1;
     int i;
-    for (i = 0; i < 4; i++){
+    for (i = 0; i < TLB_SIZE; i++){
         if (tlbPage[i] == oldPage){ //find the old page
             //insert the new page and update
             tlbPage[i] = newPage;
